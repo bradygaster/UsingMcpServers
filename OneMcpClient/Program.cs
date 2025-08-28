@@ -6,7 +6,9 @@ using System.ClientModel;
 using OpenAI.Chat;
 using System.Text;
 using ModelContextProtocol.Client;
+using Microsoft.Extensions.AI;
 using System.Threading.Tasks;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -14,7 +16,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddMcpClient();
 
 // Add the OpenAI Chat Client for the Foundry Local Manager
-var alias = "phi-3.5-mini";
+var alias = "deepseek-r1-7b-gpu";
 var manager = await FoundryLocalManager.StartModelAsync(aliasOrModelId: alias);
 var model = await manager.GetModelInfoAsync(aliasOrModelId: alias);
 ApiKeyCredential key = new ApiKeyCredential(manager.ApiKey);
@@ -23,8 +25,14 @@ OpenAIClient client = new OpenAIClient(key, new OpenAIClientOptions
     Endpoint = manager.Endpoint
 });
 
-var chatClient = client.GetChatClient(model?.ModelId);
-builder.Services.AddSingleton<ChatClient>(chatClient);
+// var chatClient = client.GetChatClient(model?.ModelId).AsIChatClient();
+var chatClient =
+    new ChatClientBuilder(
+        client.GetChatClient(model?.ModelId).AsIChatClient())
+        .UseFunctionInvocation()
+        .Build();
+
+builder.Services.AddSingleton<IChatClient>(chatClient);
 builder.Services.AddSingleton<ChatClientUI>();
 
 // Build the application
@@ -54,23 +62,26 @@ while (true)
 
 
 // The ChatClientUI class is responsible for interacting with the OpenAI chat client
-public class ChatClientUI(ChatClient chatClient, IMcpClient mcpClient)
+public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 {
     public async Task<string> Chat(string prompt = "Why is the sky blue")
     {
-        ChatMessage[] message = new[] { (ChatMessage)prompt };
+        ChatMessage[] message = [new ChatMessage(ChatRole.User, prompt)];
         var tools = await mcpClient.ListToolsAsync();
-        var options = new ChatCompletionOptions { MaxOutputTokenCount = 4096 };
-        var completionUpdates = chatClient.CompleteChatStreaming(message, options);
+        var options = new ChatOptions
+        {
+            Tools = [.. tools],
+            MaxOutputTokens = 4096
+        };
+
+        var completionUpdates = chatClient.GetStreamingResponseAsync(message, options);
 
         var sb = new StringBuilder();
 
-        foreach (var completionUpdate in completionUpdates)
+        await foreach (var completionUpdate in completionUpdates)
         {
-            if (completionUpdate.ContentUpdate.Count > 0)
-            {
-                sb.Append(completionUpdate.ContentUpdate[0].Text);
-            }
+
+                sb.Append(completionUpdate.Text);
         }
 
         var output = sb.ToString();
