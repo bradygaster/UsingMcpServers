@@ -16,7 +16,7 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddMcpClient();
 
 // Add the OpenAI Chat Client for the Foundry Local Manager
-var alias = "deepseek-r1-7b-gpu";
+var alias = "deepseek-r1-distill-qwen-7b-generic-gpu";
 var manager = await FoundryLocalManager.StartModelAsync(aliasOrModelId: alias);
 var model = await manager.GetModelInfoAsync(aliasOrModelId: alias);
 ApiKeyCredential key = new ApiKeyCredential(manager.ApiKey);
@@ -80,8 +80,12 @@ public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 
         await foreach (var completionUpdate in completionUpdates)
         {
+            if (completionUpdate.Role == ChatRole.Tool)
+            {
+                Console.WriteLine("Called tool...");
+            }
 
-                sb.Append(completionUpdate.Text);
+            sb.Append(completionUpdate.Text);
         }
 
         var output = sb.ToString();
