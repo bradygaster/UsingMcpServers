@@ -1,13 +1,10 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AI.Foundry.Local;
 using OpenAI;
 using System.ClientModel;
-using OpenAI.Chat;
 using System.Text;
 using ModelContextProtocol.Client;
 using Microsoft.Extensions.AI;
-using System.Threading.Tasks;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -15,20 +12,13 @@ var builder = Host.CreateApplicationBuilder(args);
 // Add the MCP Client for the MCP Server containing our tools
 builder.Services.AddMcpClient();
 
-// Add the OpenAI Chat Client for the Foundry Local Manager
-var alias = "deepseek-r1-7b-gpu";
-var manager = await FoundryLocalManager.StartModelAsync(aliasOrModelId: alias);
-var model = await manager.GetModelInfoAsync(aliasOrModelId: alias);
-ApiKeyCredential key = new ApiKeyCredential(manager.ApiKey);
-OpenAIClient client = new OpenAIClient(key, new OpenAIClientOptions
-{
-    Endpoint = manager.Endpoint
-});
+// Add the OpenAI Chat Client for OpenAI
+ApiKeyCredential key = new ApiKeyCredential(Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty);
+OpenAIClient client = new OpenAIClient(key);
 
-// var chatClient = client.GetChatClient(model?.ModelId).AsIChatClient();
 var chatClient =
     new ChatClientBuilder(
-        client.GetChatClient(model?.ModelId).AsIChatClient())
+        client.GetChatClient("gpt-4o-mini").AsIChatClient())
         .UseFunctionInvocation()
         .Build();
 
@@ -66,7 +56,10 @@ public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 {
     public async Task<string> Chat(string prompt = "Why is the sky blue")
     {
-        ChatMessage[] message = [new ChatMessage(ChatRole.User, prompt)];
+        ChatMessage[] message = [
+            new ChatMessage(ChatRole.System, "You are a helpful assistant that uses tools to answer user questions. If you need to perform a task, use the appropriate tool."),
+            new ChatMessage(ChatRole.User, prompt)
+        ];
         var tools = await mcpClient.ListToolsAsync();
         var options = new ChatOptions
         {
@@ -80,8 +73,11 @@ public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 
         await foreach (var completionUpdate in completionUpdates)
         {
-
-                sb.Append(completionUpdate.Text);
+            if (completionUpdate.Role == ChatRole.Tool)
+            {
+                Console.WriteLine("Called tool...");
+            }
+            sb.Append(completionUpdate.Text);
         }
 
         var output = sb.ToString();
