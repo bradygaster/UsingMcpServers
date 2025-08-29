@@ -6,6 +6,8 @@ using System.Text;
 using ModelContextProtocol.Client;
 using Microsoft.Extensions.AI;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using Azure.Identity;
+using Azure.AI.OpenAI;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -13,8 +15,9 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddMcpClient();
 
 // Add the OpenAI Chat Client for OpenAI
-ApiKeyCredential key = new ApiKeyCredential(Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty);
-OpenAIClient client = new OpenAIClient(key);
+// ApiKeyCredential key = new ApiKeyCredential(Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty);
+var endpoint = new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? string.Empty);
+OpenAIClient client = new AzureOpenAIClient(endpoint, new DefaultAzureCredential());
 
 var chatClient =
     new ChatClientBuilder(
