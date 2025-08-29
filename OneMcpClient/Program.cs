@@ -11,11 +11,12 @@ using Microsoft.Extensions.AI;
 using System.Threading.Tasks;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 using ModelContextProtocol.Protocol;
+using System.ComponentModel;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add the MCP Client for the MCP Server containing our tools
-builder.Services.AddMcpClient();
+// builder.Services.AddMcpClient();
 
 // Add the OpenAI Chat Client for the Foundry Local Manager
 var alias = "deepseek-r1-distill-qwen-7b-generic-gpu";
@@ -62,17 +63,23 @@ while (true)
     Console.WriteLine("");
 }
 
-
 // The ChatClientUI class is responsible for interacting with the OpenAI chat client
-public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
+// public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
+public class ChatClientUI(IChatClient chatClient)
 {
+    [Description("Reverses the input string.")]
+    public string ReverseString(string input)
+    {
+        return new string(input.Reverse().ToArray());
+    }
+
     public async Task<string> Chat(string prompt = "Why is the sky blue")
     {
         ChatMessage[] message = [new ChatMessage(ChatRole.User, prompt)];
-        var tools = await mcpClient.ListToolsAsync();
+        // var tools = await mcpClient.ListToolsAsync();
         var options = new ChatOptions
         {
-            Tools = [.. tools],
+            Tools = [AIFunctionFactory.Create(ReverseString)],
             MaxOutputTokens = 4096
         };
 
