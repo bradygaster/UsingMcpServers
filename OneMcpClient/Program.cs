@@ -5,10 +5,12 @@ using OpenAI;
 using System.ClientModel;
 using OpenAI.Chat;
 using System.Text;
+using System.Text.Json;
 using ModelContextProtocol.Client;
 using Microsoft.Extensions.AI;
 using System.Threading.Tasks;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using ModelContextProtocol.Protocol;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -78,17 +80,21 @@ public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 
         var sb = new StringBuilder();
 
+        var modelOutput = new StringBuilder();
+
         await foreach (var completionUpdate in completionUpdates)
         {
-            if (completionUpdate.Role == ChatRole.Tool)
-            {
-                Console.WriteLine("Called tool...");
-            }
+
+            var msg = new { MessageRole = completionUpdate.Role, Content = completionUpdate.Contents?.First() };
+
+            // Print the completionUpdate.Contents as formatted JSON for clarity
+            modelOutput.Append($"{JsonSerializer.Serialize(msg, new JsonSerializerOptions { WriteIndented = true })}");
 
             sb.Append(completionUpdate.Text);
         }
 
         var output = sb.ToString();
+        File.WriteAllText("output.json", modelOutput.ToString());
         return output;
     }
 }
