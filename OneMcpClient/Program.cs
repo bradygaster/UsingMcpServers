@@ -1,30 +1,31 @@
 ﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AI.Foundry.Local;
 using OpenAI;
 using System.ClientModel;
-using OpenAI.Chat;
 using System.Text;
 using ModelContextProtocol.Client;
-using System.Threading.Tasks;
+using Microsoft.Extensions.AI;
+using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
+using Azure.Identity;
+using Azure.AI.OpenAI;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 // Add the MCP Client for the MCP Server containing our tools
 builder.Services.AddMcpClient();
 
-// Add the OpenAI Chat Client for the Foundry Local Manager
-var alias = "phi-3.5-mini";
-var manager = await FoundryLocalManager.StartModelAsync(aliasOrModelId: alias);
-var model = await manager.GetModelInfoAsync(aliasOrModelId: alias);
-ApiKeyCredential key = new ApiKeyCredential(manager.ApiKey);
-OpenAIClient client = new OpenAIClient(key, new OpenAIClientOptions
-{
-    Endpoint = manager.Endpoint
-});
+// Add the OpenAI Chat Client for OpenAI
+// ApiKeyCredential key = new ApiKeyCredential(Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty);
+var endpoint = new Uri(Environment.GetEnvironmentVariable("AZURE_OPENAI_ENDPOINT") ?? string.Empty);
+OpenAIClient client = new AzureOpenAIClient(endpoint, new DefaultAzureCredential());
 
-var chatClient = client.GetChatClient(model?.ModelId);
-builder.Services.AddSingleton<ChatClient>(chatClient);
+var chatClient =
+    new ChatClientBuilder(
+        client.GetChatClient("gpt-4o-mini").AsIChatClient())
+        .UseFunctionInvocation()
+        .Build();
+
+builder.Services.AddSingleton<IChatClient>(chatClient);
 builder.Services.AddSingleton<ChatClientUI>();
 
 // Build the application
@@ -54,23 +55,32 @@ while (true)
 
 
 // The ChatClientUI class is responsible for interacting with the OpenAI chat client
-public class ChatClientUI(ChatClient chatClient, IMcpClient mcpClient)
+public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
 {
     public async Task<string> Chat(string prompt = "Why is the sky blue")
     {
-        ChatMessage[] message = new[] { (ChatMessage)prompt };
+        ChatMessage[] message = [
+            new ChatMessage(ChatRole.System, "You are a helpful assistant that uses tools to answer user questions. If you need to perform a task, use the appropriate tool."),
+            new ChatMessage(ChatRole.User, prompt)
+        ];
         var tools = await mcpClient.ListToolsAsync();
-        var options = new ChatCompletionOptions { MaxOutputTokenCount = 4096 };
-        var completionUpdates = chatClient.CompleteChatStreaming(message, options);
+        var options = new ChatOptions
+        {
+            Tools = [.. tools],
+            MaxOutputTokens = 4096
+        };
+
+        var completionUpdates = chatClient.GetStreamingResponseAsync(message, options);
 
         var sb = new StringBuilder();
 
-        foreach (var completionUpdate in completionUpdates)
+        await foreach (var completionUpdate in completionUpdates)
         {
-            if (completionUpdate.ContentUpdate.Count > 0)
+            if (completionUpdate.Role == ChatRole.Tool)
             {
-                sb.Append(completionUpdate.ContentUpdate[0].Text);
+                Console.WriteLine("Called tool...");
             }
+            sb.Append(completionUpdate.Text);
         }
 
         var output = sb.ToString();
