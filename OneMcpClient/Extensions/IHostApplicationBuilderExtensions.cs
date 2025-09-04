@@ -2,8 +2,9 @@
 using Azure.Identity;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
-namespace Microsoft.Extensions.Hosting;
+namespace OneMcpClient.Extensions;
 
 public static class IHostApplicationBuilderExtensions
 {
@@ -19,7 +20,7 @@ public static class IHostApplicationBuilderExtensions
                 .UseFunctionInvocation()
                 .Build();
 
-        builder.Services.AddSingleton<IChatClient>(chatClient);
+        builder.Services.AddSingleton(chatClient);
         return builder;
     }
 }

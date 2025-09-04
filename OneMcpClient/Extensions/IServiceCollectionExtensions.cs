@@ -1,13 +1,14 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
 
-namespace Microsoft.Extensions.DependencyInjection;
+namespace OneMcpClient.Extensions;
 
 public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddMcpClient(this IServiceCollection services)
     {
-        services.AddTransient<IMcpClient>(sp =>
+        services.AddTransient(sp =>
         {
             var loggerFactory = sp.GetRequiredService<ILoggerFactory>();
 
