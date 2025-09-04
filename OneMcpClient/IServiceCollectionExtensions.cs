@@ -3,7 +3,7 @@ using ModelContextProtocol.Client;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
-public static class Extensions
+public static class IServiceCollectionExtensions
 {
     public static IServiceCollection AddMcpClient(this IServiceCollection services)
     {
