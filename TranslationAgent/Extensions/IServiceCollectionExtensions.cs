@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Client;
 
-namespace OneMcpClient.Extensions;
+namespace Microsoft.Extensions.DependencyInjection;
 
 public static class IServiceCollectionExtensions
 {

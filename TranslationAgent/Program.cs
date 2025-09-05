@@ -2,8 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using OneMcpClient;
-using OneMcpClient.Extensions;
+using TranslationAgent;
 
 var builder = Host.CreateApplicationBuilder(args);
 

@@ -3,7 +3,7 @@ using ModelContextProtocol.Client;
 using System.Text;
 using ChatMessage = Microsoft.Extensions.AI.ChatMessage;
 
-namespace OneMcpClient;
+namespace TranslationAgent;
 
 // The ChatClientUI class is responsible for interacting with the OpenAI chat client and handling user interface
 public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)

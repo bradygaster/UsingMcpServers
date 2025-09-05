@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace OneMcpClient.Extensions;
+namespace Microsoft.Extensions.Hosting;
 
 public static class IHostApplicationBuilderExtensions
 {
