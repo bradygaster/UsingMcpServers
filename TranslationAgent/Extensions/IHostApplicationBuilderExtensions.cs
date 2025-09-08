@@ -2,7 +2,6 @@
 using Azure.Identity;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Microsoft.Extensions.Hosting;
 
