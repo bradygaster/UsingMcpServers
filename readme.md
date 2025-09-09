@@ -5,7 +5,7 @@ A demonstration application that uses Model Context Protocol (MCP) to provide cu
 ## Project Structure
 
 ```
-UsingMcpServers/
+/
 ├── TranslationAgent/                    # Main chat client application
 │   ├── Program.cs                       # Application entry point and DI setup
 │   ├── ChatClientUI.cs                  # Console-based chat interface
@@ -21,14 +21,6 @@ UsingMcpServers/
 │   │   ├── CodeSpeakTool.cs            # Text transformation tool
 │   │   └── ReverseTool.cs              # Reverses input text
 │   └── TranslationTools.csproj         # Project file with MCP dependencies
-│
-├── infra/                              # Azure infrastructure as code
-│   ├── main.bicep                      # Bicep template for Azure resources
-│   ├── main.bicepparam                 # Parameters for Bicep deployment
-│   └── README.md                       # Infrastructure documentation
-│
-├── scripts/
-│   └── deploy-azure-openai.ps1        # PowerShell deployment script
 │
 ├── prompt.md                          # Azure provisioning prompt for Copilot
 └── TranslationAgent.sln               # Visual Studio solution file
