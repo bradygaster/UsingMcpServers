@@ -55,10 +55,6 @@ graph TD
     C --> M[LLM processes tool results]
     M --> B
     B --> N[Display Response to User]
-    
-    style C fill:#e1f5fe
-    style G fill:#f3e5f5
-    style H fill:#f3e5f5
 ```
 
 ## Azure Resource Provisioning
