@@ -1,0 +1,1 @@
+Create a new Azure Open AI resource in my Azure subscription, in a new resource group, and use random names for the resources and group. Then add a gpt-4o-mini model deployment to that resource instance. Once the resources have been provisioned, set the AZURE_OPENAI_ENDPOINT user secret to be the Azure Open AI endpoint for the new resource. 
