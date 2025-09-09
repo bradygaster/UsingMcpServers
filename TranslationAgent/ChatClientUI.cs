@@ -41,7 +41,7 @@ public class ChatClientUI(IChatClient chatClient, IMcpClient mcpClient)
     private async Task<string> Chat(string prompt)
     {
         ChatMessage[] message = [
-            new ChatMessage(ChatRole.System, "You are a helpful assistant that uses tools to answer user questions. If you need to perform a task, use the appropriate tool."),
+            new ChatMessage(ChatRole.System, "You are a helpful assistant translator who knows a handful of languages - not just any language. Each language you know is represented by an individual tool. When users provide strings to be translated, use all of the tools you have so the user can see the string translated into all three languages."),
             new ChatMessage(ChatRole.User, prompt)
         ];
         var tools = await mcpClient.ListToolsAsync();
