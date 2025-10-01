@@ -25,7 +25,7 @@ You are an expert in Azure infrastructure automation and security best practices
    - Keep everything runnable via CLI in a developer environment.  
 
 4. **Output Format**
-   - Show CLI commands in **exact execution order**, with short inline comments.  
+   - Show CLI commands in **exact execution order**, without short inline comments.  
    - Do not include any keys, connection strings, or secrets.  
    - Use secure defaults and idempotent-friendly flags.  
 
