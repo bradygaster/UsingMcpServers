@@ -13,6 +13,7 @@ public class AgentChatUI(AIAgent agent)
         Console.WriteLine("🤖 Translation Agent powered by Agent Framework!");
         Console.WriteLine("✨ Features: MCP Tools + Agent Orchestration + Conversation Memory");
         Console.WriteLine("📝 Available tools: CodeSpeak, LeetSpeak, Reverse (MCP Tools)");
+        Console.WriteLine("🚀 Add PirateSpeak tool during demo (Agent Framework Tool)");
         Console.WriteLine();
 
         while (true)
