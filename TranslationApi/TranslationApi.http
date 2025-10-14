@@ -1,0 +1,33 @@
+@TranslationApi_HostAddress = https://localhost:7192
+
+
+###
+
+# Translation API Tests
+
+POST {{TranslationApi_HostAddress}}/translate
+Content-Type: application/json
+
+{
+  "text": "Hello World"
+}
+
+###
+
+POST {{TranslationApi_HostAddress}}/translate
+Content-Type: application/json
+
+{
+  "text": "Good morning everyone"
+}
+
+###
+
+POST {{TranslationApi_HostAddress}}/translate
+Content-Type: application/json
+
+{
+  "text": "How are you today?"
+}
+
+###

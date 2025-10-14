@@ -1,4 +1,6 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 builder.Services
        .AddMcpServer()
@@ -6,6 +8,8 @@ builder.Services
        .WithToolsFromAssembly();
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.MapMcp();
 
