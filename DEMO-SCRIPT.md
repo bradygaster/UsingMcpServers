@@ -48,11 +48,10 @@ Reverse: dlrow olleH
 
 **Demo Steps:**
 1. Stop the application (Ctrl+C)
-2. Open `IHostApplicationBuilderExtensions.cs`
-3. Find the commented PirateSpeak tool code
-4. **Live uncomment these lines:**
+2. Open `TranslationAgent\Tools\PirateSpeakTool.cs`
+3. **Uncomment the tool implementation** (remove the `/*` and `*/` around lines 18-25):
 ```csharp
-var pirateSpeakTool = AIFunctionFactory.Create(
+return AIFunctionFactory.Create(
     [Description("Convert text to Pirate Speak - adds 'ahoy', 'matey', replaces 'you' with 'ye'")]
     static string ToPirateSpeak(string input) => 
         input.Replace("you", "ye")
@@ -60,16 +59,19 @@ var pirateSpeakTool = AIFunctionFactory.Create(
              .Replace("hello", "ahoy")
              .Replace("hi", "ahoy") + ", matey!");
 ```
-5. **Uncomment in tools array:**
+4. **Comment out the null return line**:
 ```csharp
-tools: [
-    .. mcpTools.Cast<AITool>(),
-    pirateSpeakTool  // Add this line
-]
+// return null!;
 ```
-6. Save file
-7. Restart: `dotnet run`
-8. Test: "Translate 'Hello, how are you today?' into all available formats"
+5. Open `Extensions\IHostApplicationBuilderExtensions.cs`
+6. **Uncomment these two lines** (around lines 28-29):
+```csharp
+var pirateSpeakTool = PirateSpeakTool.Create();
+if (pirateSpeakTool != null) allTools.Add(pirateSpeakTool);
+```
+7. Save both files
+8. Restart: `dotnet run`
+9. Test: "Translate 'Hello, how are you today?' into all available formats"
 
 **Expected Output After Addition:**
 ```
