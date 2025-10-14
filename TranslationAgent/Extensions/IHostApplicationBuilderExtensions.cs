@@ -4,7 +4,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Agents.AI;
 using ModelContextProtocol.Client;
-using TranslationAgent.Tools;
 
 namespace Microsoft.Extensions.Hosting;
 
@@ -29,10 +28,6 @@ public static class IHostApplicationBuilderExtensions
             
             // Prepare tools list - start with MCP tools
             var allTools = mcpTools.Cast<AITool>().ToList();
-
-            // Pirate speak tool that's a AITool rather than an MCP tool
-            var pirateSpeakTool = PirateSpeakTool.Create();
-            if (pirateSpeakTool != null) allTools.Add(pirateSpeakTool);
 
             var agent = chatClient.CreateAIAgent(
                 name: "TranslationAgent",
