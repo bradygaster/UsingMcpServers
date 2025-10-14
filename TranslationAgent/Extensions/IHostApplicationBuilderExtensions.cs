@@ -10,12 +10,13 @@ public static class IHostApplicationBuilderExtensions
     public static IHostApplicationBuilder AddAzureOpenAi(this IHostApplicationBuilder builder)
     {
         var endpointValue = builder.Configuration["AZURE_OPENAI_ENDPOINT"]!;
+        var modelName = builder.Configuration["MODEL_NAME"]!;
         var endpoint = new Uri(endpointValue);
         var client = new AzureOpenAIClient(endpoint, new DefaultAzureCredential());
 
         var chatClient =
             new ChatClientBuilder(
-                client.GetChatClient("gpt-4o-mini").AsIChatClient())
+                client.GetChatClient(modelName).AsIChatClient())
                 .UseFunctionInvocation()
                 .Build();
 
