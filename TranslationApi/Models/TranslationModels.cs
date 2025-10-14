@@ -4,5 +4,6 @@ public record TranslationRequest(string Text);
 
 public record TranslationResponse(
     string OriginalText,
-    string AgentResponse
+    Dictionary<string, string> Translations,
+    string? RawAgentResponse = null
 );

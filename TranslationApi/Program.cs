@@ -42,10 +42,15 @@ app.MapPost("/translate", async (TranslationRequest request, AIAgent agent) =>
     {
         // Use the same agent interaction as the console app
         var response = await agent.RunAsync(request.Text);
+        var agentText = response.Text ?? "No response received";
+        
+        // Parse the agent's response to extract individual translations
+        var translations = ParseTranslations(agentText);
         
         return Results.Ok(new TranslationResponse(
             OriginalText: request.Text,
-            AgentResponse: response.Text ?? "No response received"
+            Translations: translations,
+            RawAgentResponse: agentText
         ));
     }
     catch (Exception ex)
@@ -57,5 +62,55 @@ app.MapPost("/translate", async (TranslationRequest request, AIAgent agent) =>
         );
     }
 });
+
+static Dictionary<string, string> ParseTranslations(string agentResponse)
+{
+    var translations = new Dictionary<string, string>();
+    
+    // Look for patterns like "1. CodeSpeak: result" or "CodeSpeak: result"
+    var lines = agentResponse.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+    
+    foreach (var line in lines)
+    {
+        var trimmedLine = line.Trim();
+        
+        // Try to match patterns like "1. ToolName: result" or "ToolName: result"
+        if (TryExtractTranslation(trimmedLine, "CodeSpeak", out var codeSpeak))
+            translations["CodeSpeak"] = codeSpeak;
+        else if (TryExtractTranslation(trimmedLine, "Leet Speak", out var leetSpeak))
+            translations["LeetSpeak"] = leetSpeak;
+        else if (TryExtractTranslation(trimmedLine, "Reversed", out var reversed))
+            translations["Reverse"] = reversed;
+        else if (TryExtractTranslation(trimmedLine, "Pirate Speak", out var pirateSpeak))
+            translations["PirateSpeak"] = pirateSpeak;
+    }
+    
+    return translations;
+}
+
+static bool TryExtractTranslation(string line, string toolName, out string translation)
+{
+    translation = string.Empty;
+    
+    // Look for patterns like "1. ToolName: result" or "**ToolName**: result" or "ToolName: result"
+    var patterns = new[]
+    {
+        $"**{toolName}**:",
+        $"{toolName}:",
+        $". {toolName}:"
+    };
+    
+    foreach (var pattern in patterns)
+    {
+        var index = line.IndexOf(pattern, StringComparison.OrdinalIgnoreCase);
+        if (index >= 0)
+        {
+            translation = line.Substring(index + pattern.Length).Trim();
+            return !string.IsNullOrEmpty(translation);
+        }
+    }
+    
+    return false;
+}
 
 app.Run();
