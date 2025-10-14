@@ -12,15 +12,15 @@ builder.Configuration.AddUserSecrets<Program>();
 // Add the MCP Client for the MCP Server containing our tools
 builder.Services.AddMcpClient();
 
-// Add the Azure OpenAI client for the chat client that will interact with the MCP Client
-builder.AddAzureOpenAi();
+// Add the Azure OpenAI client for the Agent Framework that will interact with the MCP Client
+builder.AddAzureOpenAiAgent();
 
-// Add the UI layer for the chat client that will interact with the user
-builder.Services.AddSingleton<ChatClientUI>();
+// Add the UI layer for the agent that will interact with the user
+builder.Services.AddSingleton<AgentChatUI>();
 
 // Build the application
 var app = builder.Build();
 
 // Run the application
-var chatClientUi = app.Services.GetRequiredService<ChatClientUI>();
-await chatClientUi.RunAsync();
+var agentChatUi = app.Services.GetRequiredService<AgentChatUI>();
+await agentChatUi.RunAsync();
